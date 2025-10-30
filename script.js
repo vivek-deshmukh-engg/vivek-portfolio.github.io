@@ -1,163 +1,102 @@
-/* ========= Custom Animated Cursor ========= */
-const dot = document.getElementById('cursor-dot');
-const ring = document.getElementById('cursor-ring');
+// === Custom Cursor ===
+const cursorDot = document.getElementById("cursor-dot");
+const cursorRing = document.getElementById("cursor-ring");
 
-let mouseX = 0, mouseY = 0;
-let ringX = 0, ringY = 0;
-
-// Move dot instantly
-document.addEventListener('mousemove', e => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
-  dot.style.left = mouseX + 'px';
-  dot.style.top = mouseY + 'px';
+document.addEventListener("mousemove", (e) => {
+  cursorDot.style.left = e.clientX + "px";
+  cursorDot.style.top = e.clientY + "px";
+  cursorRing.style.left = e.clientX + "px";
+  cursorRing.style.top = e.clientY + "px";
 });
 
-// Smooth follow ring
-function moveRing() {
-  ringX += (mouseX - ringX) * 0.15;
-  ringY += (mouseY - ringY) * 0.15;
-  ring.style.left = ringX + 'px';
-  ring.style.top = ringY + 'px';
-  requestAnimationFrame(moveRing);
-}
-moveRing();
-
-// Hover scaling on clickable items
-const clickable = document.querySelectorAll('a, button, .project, .btn');
-clickable.forEach(el => {
-  el.addEventListener('mouseenter', () => {
-    ring.style.transform = 'translate(-50%, -50%) scale(1.5)';
-    dot.style.transform = 'translate(-50%, -50%) scale(0.6)';
+// === Smooth Button Glow on Hover ===
+document.querySelectorAll("a, button").forEach((el) => {
+  el.addEventListener("mouseenter", () => {
+    cursorRing.style.transform = "scale(1.5)";
+    cursorRing.style.borderColor = "#0ff";
   });
-  el.addEventListener('mouseleave', () => {
-    ring.style.transform = 'translate(-50%, -50%) scale(1)';
-    dot.style.transform = 'translate(-50%, -50%) scale(1)';
+  el.addEventListener("mouseleave", () => {
+    cursorRing.style.transform = "scale(1)";
+    cursorRing.style.borderColor = "#9f5fff";
   });
 });
 
-/* ========= Scroll Reveal Animation ========= */
-const revealEls = document.querySelectorAll('.section, .skill, .project, .achievements-list li');
-const obsOptions = { threshold: 0.1 };
+// === Simple "Read More" Popup ===
+const modal = document.createElement("div");
+modal.classList.add("modal");
+modal.innerHTML = `
+  <div class="modal-content">
+    <button id="modal-close">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+`;
+document.body.appendChild(modal);
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity = 1;
-      entry.target.style.transform = 'translateY(0)';
-      observer.unobserve(entry.target);
-    }
-  });
-}, obsOptions);
+const modalBody = document.getElementById("modal-body");
+const modalClose = document.getElementById("modal-close");
 
-revealEls.forEach(el => {
-  el.style.opacity = 0;
-  el.style.transform = 'translateY(20px)';
-  el.style.transition = 'all 0.6s ease-out';
-  observer.observe(el);
-});
-
-/* ========= Project Details (Read More) ========= */
-const projectData = {
-  p1: {
-    title: "Oscilloscope using ESP32",
-    detail: `<p><strong>Overview:</strong> A portable digital oscilloscope using ESP32's ADC for waveform capture and web visualization.</p>
-    <p><strong>Features:</strong> Real-time sampling, dual-channel view, browser UI, and microSD logging.</p>
-    <p><strong>Tech:</strong> ESP32 ADC, WebSocket, HTML5 Canvas, SPI.</p>`
-  },
-  p2: {
-    title: "Home Automation Using Clap Detection",
-    detail: `<p><strong>Overview:</strong> Clap-based control system for appliances using sound detection.</p>
-    <p><strong>Features:</strong> Pattern recognition, noise filtering, and relay control.</p>`
-  },
-  p3: {
-    title: "Automatic Water Level Controller Using IC555",
-    detail: `<p>Simple IC555 timer-based water pump controller with automatic ON/OFF switching.</p>`
-  },
-  p4: {
-    title: "Environmental Monitoring",
-    detail: `<p>IoT-based environment monitoring for temperature, humidity, and air quality with cloud logging.</p>`
-  },
-  p5: {
-    title: "Automatic Handwash Dispenser",
-    detail: `<p>Touchless handwash dispenser using IR sensors and a micro pump with adjustable flow timing.</p>`
-  },
-  p6: {
-    title: "RADAR Using Ultrasonic Sensor & Data Logging",
-    detail: `<p>Ultrasonic radar scanning with object detection visualization and data logging to web dashboard.</p>`
-  },
-  p7: {
-    title: "Traffic Light Controller",
-    detail: `<p>Microcontroller-based sequential traffic light controller with pedestrian crossing support.</p>`
-  },
-  p8: {
-    title: "Street Light Controller",
-    detail: `<p>Automatic LDR + RTC-controlled street light system for efficient energy use.</p>`
-  },
-  p9: {
-    title: "Step Counter",
-    detail: `<p>Low-power wearable step counter using accelerometer and signal processing algorithm.</p>`
-  },
-  p10: {
-    title: "Border Defence Tank System",
-    detail: `<p>Autonomous vehicle prototype for defense simulation with obstacle detection and control.</p>`
-  },
-  p11: {
-    title: "Blackbox System for Car",
-    detail: `<p>Vehicle data recorder capturing GPS, accelerometer, and event data for analysis.</p>`
-  }
+const projectDetails = {
+  p1: "An oscilloscope built using ESP32 to visualize analog signals in real-time with a web interface.",
+  p2: "Smart home automation system triggered by sound-based clap detection using a microcontroller.",
+  p3: "Water level monitoring and control using IC555-based circuit design.",
+  p4: "IoT-based environmental system monitoring temperature, humidity, and air quality data.",
+  p5: "Touchless automatic handwash dispenser with IR sensor detection.",
+  p6: "Ultrasonic RADAR system with ESP8266 for object detection and web data visualization.",
+  p7: "Traffic signal simulation and control logic for multiple road lanes.",
+  p8: "Automatic street light control based on LDR sensing of ambient light.",
+  p9: "Step counter using accelerometer and microcontroller for fitness tracking.",
+  p10: "Defence tank system for border surveillance with remote operation.",
+  p11: "Car blackbox system that logs accident data and sensor parameters.",
 };
 
-// Modal logic
-const modal = document.getElementById('proj-modal');
-const modalContent = document.getElementById('modal-content');
-const modalClose = document.getElementById('modal-close');
-
-document.querySelectorAll('.read-more').forEach(btn => {
-  btn.addEventListener('click', () => {
+document.querySelectorAll(".read-more").forEach((btn) => {
+  btn.addEventListener("click", () => {
     const id = btn.dataset.id;
-    const info = projectData[id];
-    if (info) {
-      modalContent.innerHTML = `<h2>${info.title}</h2>${info.detail}`;
-      modal.setAttribute('aria-hidden', 'false');
-    }
+    modalBody.textContent = projectDetails[id];
+    modal.style.display = "flex";
   });
 });
 
-modalClose.addEventListener('click', () => {
-  modal.setAttribute('aria-hidden', 'true');
-  modalContent.innerHTML = '';
+modalClose.addEventListener("click", () => {
+  modal.style.display = "none";
 });
 
-modal.addEventListener('click', e => {
-  if (e.target === modal) {
-    modal.setAttribute('aria-hidden', 'true');
-    modalContent.innerHTML = '';
-  }
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
 });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    modal.setAttribute('aria-hidden', 'true');
-    modalContent.innerHTML = '';
-  }
-});
-
-/* ========= Contact Form (Mailto) ========= */
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-  contactForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const name = contactForm.name.value.trim();
-    const email = contactForm.email.value.trim();
-    const msg = contactForm.message.value.trim();
-    const subject = encodeURIComponent(`Portfolio Contact from ${name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
-    window.location.href = `mailto:vivekdeshmukh8055@gmail.com?subject=${subject}&body=${body}`;
-  });
+// === Modal Styling ===
+const modalStyle = document.createElement("style");
+modalStyle.textContent = `
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
 }
-
-/* ========= Page load animation ========= */
-window.addEventListener('load', () => {
-  document.body.style.transition = 'background 0.6s ease';
-});
+.modal-content {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  color: #fff;
+  text-align: center;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 25px #9f5fff88;
+}
+#modal-close {
+  background: none;
+  border: none;
+  color: #0ff;
+  font-size: 1.5rem;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  cursor: pointer;
+}
+`;
+document.head.appendChild(modalStyle);

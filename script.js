@@ -1,110 +1,163 @@
-:root{
-  --bg:#060608;
-  --card:#0f1720;
-  --accent:#7b2bff;
-  --accent2:#00ffe0;
-  --muted:#a9b0b8;
-  --glass: rgba(255,255,255,0.03);
-  --max-width:1100px;
+/* ========= Custom Animated Cursor ========= */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+
+let mouseX = 0, mouseY = 0;
+let ringX = 0, ringY = 0;
+
+// Move dot instantly
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dot.style.left = mouseX + 'px';
+  dot.style.top = mouseY + 'px';
+});
+
+// Smooth follow ring
+function moveRing() {
+  ringX += (mouseX - ringX) * 0.15;
+  ringY += (mouseY - ringY) * 0.15;
+  ring.style.left = ringX + 'px';
+  ring.style.top = ringY + 'px';
+  requestAnimationFrame(moveRing);
+}
+moveRing();
+
+// Hover scaling on clickable items
+const clickable = document.querySelectorAll('a, button, .project, .btn');
+clickable.forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1.5)';
+    dot.style.transform = 'translate(-50%, -50%) scale(0.6)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1)';
+    dot.style.transform = 'translate(-50%, -50%) scale(1)';
+  });
+});
+
+/* ========= Scroll Reveal Animation ========= */
+const revealEls = document.querySelectorAll('.section, .skill, .project, .achievements-list li');
+const obsOptions = { threshold: 0.1 };
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = 1;
+      entry.target.style.transform = 'translateY(0)';
+      observer.unobserve(entry.target);
+    }
+  });
+}, obsOptions);
+
+revealEls.forEach(el => {
+  el.style.opacity = 0;
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'all 0.6s ease-out';
+  observer.observe(el);
+});
+
+/* ========= Project Details (Read More) ========= */
+const projectData = {
+  p1: {
+    title: "Oscilloscope using ESP32",
+    detail: `<p><strong>Overview:</strong> A portable digital oscilloscope using ESP32's ADC for waveform capture and web visualization.</p>
+    <p><strong>Features:</strong> Real-time sampling, dual-channel view, browser UI, and microSD logging.</p>
+    <p><strong>Tech:</strong> ESP32 ADC, WebSocket, HTML5 Canvas, SPI.</p>`
+  },
+  p2: {
+    title: "Home Automation Using Clap Detection",
+    detail: `<p><strong>Overview:</strong> Clap-based control system for appliances using sound detection.</p>
+    <p><strong>Features:</strong> Pattern recognition, noise filtering, and relay control.</p>`
+  },
+  p3: {
+    title: "Automatic Water Level Controller Using IC555",
+    detail: `<p>Simple IC555 timer-based water pump controller with automatic ON/OFF switching.</p>`
+  },
+  p4: {
+    title: "Environmental Monitoring",
+    detail: `<p>IoT-based environment monitoring for temperature, humidity, and air quality with cloud logging.</p>`
+  },
+  p5: {
+    title: "Automatic Handwash Dispenser",
+    detail: `<p>Touchless handwash dispenser using IR sensors and a micro pump with adjustable flow timing.</p>`
+  },
+  p6: {
+    title: "RADAR Using Ultrasonic Sensor & Data Logging",
+    detail: `<p>Ultrasonic radar scanning with object detection visualization and data logging to web dashboard.</p>`
+  },
+  p7: {
+    title: "Traffic Light Controller",
+    detail: `<p>Microcontroller-based sequential traffic light controller with pedestrian crossing support.</p>`
+  },
+  p8: {
+    title: "Street Light Controller",
+    detail: `<p>Automatic LDR + RTC-controlled street light system for efficient energy use.</p>`
+  },
+  p9: {
+    title: "Step Counter",
+    detail: `<p>Low-power wearable step counter using accelerometer and signal processing algorithm.</p>`
+  },
+  p10: {
+    title: "Border Defence Tank System",
+    detail: `<p>Autonomous vehicle prototype for defense simulation with obstacle detection and control.</p>`
+  },
+  p11: {
+    title: "Blackbox System for Car",
+    detail: `<p>Vehicle data recorder capturing GPS, accelerometer, and event data for analysis.</p>`
+  }
+};
+
+// Modal logic
+const modal = document.getElementById('proj-modal');
+const modalContent = document.getElementById('modal-content');
+const modalClose = document.getElementById('modal-close');
+
+document.querySelectorAll('.read-more').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.id;
+    const info = projectData[id];
+    if (info) {
+      modalContent.innerHTML = `<h2>${info.title}</h2>${info.detail}`;
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  });
+});
+
+modalClose.addEventListener('click', () => {
+  modal.setAttribute('aria-hidden', 'true');
+  modalContent.innerHTML = '';
+});
+
+modal.addEventListener('click', e => {
+  if (e.target === modal) {
+    modal.setAttribute('aria-hidden', 'true');
+    modalContent.innerHTML = '';
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    modal.setAttribute('aria-hidden', 'true');
+    modalContent.innerHTML = '';
+  }
+});
+
+/* ========= Contact Form (Mailto) ========= */
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+  contactForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const name = contactForm.name.value.trim();
+    const email = contactForm.email.value.trim();
+    const msg = contactForm.message.value.trim();
+    const subject = encodeURIComponent(`Portfolio Contact from ${name}`);
+    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
+    window.location.href = `mailto:vivekdeshmukh8055@gmail.com?subject=${subject}&body=${body}`;
+  });
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background: radial-gradient(1200px 600px at 10% 10%, rgba(123,43,255,0.08), transparent),
-    radial-gradient(800px 400px at 90% 90%, rgba(0,255,224,0.03), transparent),
-    var(--bg);
-  color:#e9eef5; font-family: "Poppins",system-ui,Segoe UI,Roboto,Helvetica,Arial;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  line-height:1.5;
-}
-
-/* Container */
-.container{max-width:var(--max-width); margin:0 auto; padding:0 20px}
-
-/* Header */
-.site-header{position:fixed; top:0; left:0; right:0; z-index:1000; backdrop-filter: blur(6px); background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.2)); border-bottom:1px solid rgba(255,255,255,0.02)}
-.header-inner{display:flex; align-items:center; justify-content:space-between; padding:18px 0}
-.brand h1{font-size:20px; letter-spacing:0.2px; margin:0}
-.brand h1 span{color:var(--accent2)}
-.title{font-size:12px; color:var(--muted); margin-top:4px}
-
-/* Nav */
-.nav a{color:#dfe9f2; text-decoration:none; margin-left:18px; font-size:14px}
-.nav a.btn-outline{border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:8px}
-.nav a.btn-outline:hover{background:rgba(255,255,255,0.02)}
-.nav a.btn{background:var(--accent2); color:#000; padding:8px 12px; border-radius:8px; margin-left:14px; text-decoration:none}
-
-/* Hero */
-.hero{padding-top:110px; padding-bottom:60px}
-.hero-inner{display:grid; grid-template-columns: 1fr 360px; gap:36px; align-items:center}
-.hero-text h2{font-size:36px; margin:0 0 12px}
-.hero-text h2 span{color:var(--accent2)}
-.lead{color:var(--muted); max-width:680px}
-.hero-cta{margin-top:20px}
-.btn{display:inline-block; background:linear-gradient(90deg,var(--accent),#904cff); color:#fff; padding:10px 18px; border-radius:12px; text-decoration:none; box-shadow: 0 6px 24px rgba(123,43,255,0.08)}
-.btn.ghost{background:transparent; border:1px solid rgba(255,255,255,0.04); margin-left:12px}
-.btn.small{padding:8px 12px; font-size:14px}
-
-/* Hero card */
-.hero-card{position:relative; min-height:220px; border-radius:14px; overflow:hidden}
-.card-glow{position:absolute; inset:-20% -10% auto auto; width:220px; height:220px; filter:blur(60px); background:linear-gradient(45deg,var(--accent),var(--accent2)); opacity:0.25; transform:translate(30px,-30px)}
-.card-content{position:relative; background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.03); padding:20px; border-radius:14px; height:100%}
-.card-content h3{margin:0 0 8px}
-.card-content ul{list-style:none; padding:0; margin:0}
-.card-content li{margin:8px 0; color:var(--muted)}
-
-/* Sections */
-.section{padding:64px 0}
-.section.dark{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-.section-title{color:var(--accent); font-size:20px; margin-bottom:12px}
-.section-sub{color:var(--muted); max-width:900px}
-
-/* Skills grid */
-.skills-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:18px}
-.skill{background:var(--card); border-radius:12px; padding:14px; border:1px solid rgba(255,255,255,0.03); text-align:center; color:#dfe9f2; box-shadow: 0 6px 20px rgba(0,0,0,0.45)}
-
-/* Achievements */
-.achievements-list{list-style:none; padding:0; margin-top:18px}
-.achievements-list li{background:var(--card); padding:16px; border-radius:12px; margin-bottom:12px; border-left:4px solid var(--accent); color:var(--muted)}
-
-/* Projects grid */
-.projects-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px}
-.project{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); padding:16px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); position:relative}
-.project h3{margin:0 0 8px}
-.project p{margin:0 0 12px; color:var(--muted)}
-.btn-outline{background:transparent; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:10px; color:#fff}
-
-/* Contact grid */
-.contact-grid{display:grid; grid-template-columns: 1fr 1fr; gap:24px}
-.contact-info{list-style:none; padding:0; color:var(--muted)}
-.contact-form input, .contact-form textarea{width:100%; padding:12px; border-radius:10px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:#e9eef5; margin-bottom:12px}
-
-/* Footer */
-.site-footer{padding:30px 0; border-top:1px solid rgba(255,255,255,0.02); margin-top:30px; text-align:center; color:var(--muted)}
-
-/* Modal */
-.modal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:2000; opacity:0; pointer-events:none; transition:all .25s ease}
-.modal[aria-hidden="false"]{opacity:1; pointer-events:auto}
-.modal-inner{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); border-radius:12px; padding:18px; width:90%; max-width:760px; box-shadow:0 20px 60px rgba(0,0,0,0.6)}
-.modal-close{position:absolute; right:28px; top:28px; background:transparent; border:none; color:#fff; font-size:22px}
-
-/* Cursor styles */
-.cursor-dot{position:fixed; width:8px; height:8px; border-radius:50%; background:var(--accent2); transform:translate(-50%, -50%); pointer-events:none; z-index:3000; transition:transform .08s linear}
-.cursor-ring{position:fixed; width:48px; height:48px; border-radius:50%; border:2px solid rgba(123,43,255,0.6); transform:translate(-50%, -50%); pointer-events:none; z-index:2999; transition:transform .12s ease, opacity .2s}
-.cursor-ring.hidden{opacity:0}
-
-/* Responsive */
-@media (max-width:1000px){
-  .projects-grid{grid-template-columns:repeat(2,1fr)}
-  .skills-grid{grid-template-columns:repeat(2,1fr)}
-  .hero-inner{grid-template-columns:1fr}
-  .nav a{display:none}
-}
-@media (max-width:640px){
-  .projects-grid{grid-template-columns:1fr}
-  .contact-grid{grid-template-columns:1fr}
-  .skills-grid{grid-template-columns:1fr}
-  .hero-text h2{font-size:28px}
-}
+/* ========= Page load animation ========= */
+window.addEventListener('load', () => {
+  document.body.style.transition = 'background 0.6s ease';
+});

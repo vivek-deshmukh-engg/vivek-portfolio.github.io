@@ -1,166 +1,164 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+/* ========= Cursor & Interactions ========= */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  // immediate dot
+  dot.style.left = (mouseX) + 'px';
+  dot.style.top = (mouseY) + 'px';
+});
+// smooth ring follow
+function animateRing(){
+  ringX += (mouseX - ringX) * 0.16;
+  ringY += (mouseY - ringY) * 0.16;
+  ring.style.left = ringX + 'px';
+  ring.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
 }
+animateRing();
 
-body {
-  background: radial-gradient(circle at center, #0b0c10, #000);
-  color: #fff;
-  overflow-x: hidden;
-}
+// Hover effects on interactive elements
+const hoverTargets = document.querySelectorAll('a, button, .project, .btn');
+hoverTargets.forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
+    dot.style.transform = 'translate(-50%,-50%) scale(0.6)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.transform = 'translate(-50%,-50%) scale(1)';
+    dot.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+});
 
-/* Custom Cursor */
-.cursor {
-  width: 25px;
-  height: 25px;
-  border: 2px solid #00ffe0;
-  border-radius: 50%;
-  position: fixed;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  mix-blend-mode: difference;
-  transition: all 0.15s ease;
-  z-index: 1000;
-}
+/* ========= Simple reveal on scroll ========= */
+const revealEls = document.querySelectorAll('.section, .project, .skill, .achievements-list li');
+const obsOptions = {threshold: 0.08};
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.style.transform = 'translateY(0)';
+      entry.target.style.opacity = 1;
+      observer.unobserve(entry.target);
+    } else {
+      // initial style set below
+    }
+  });
+}, obsOptions);
+revealEls.forEach(el => {
+  el.style.transform = 'translateY(16px)';
+  el.style.opacity = 0;
+  el.style.transition = 'all .6s cubic-bezier(.2,.9,.2,1)';
+  observer.observe(el);
+});
 
-/* Header */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 50px;
-  position: fixed;
-  width: 100%;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  top: 0;
-  z-index: 10;
-}
+/* ========= Projects: Read more modal ========= */
+const projectData = {
+  p1: {
+    title: "Oscilloscope using ESP32",
+    detail: `<p><strong>Overview:</strong> A compact digital oscilloscope built around the ESP32's ADC, sampling waveforms and sending data to a browser-based web UI in real-time. The device captures and displays voltage-time traces, supports basic trigger modes and stores small captures on onboard flash.</p>
+    <p><strong>Features:</strong> 2-channel simulated capture (multiplexed), browser visualization (Canvas), adjustable sample rate, simple FFT preview, and data logging to microSD.</p>
+    <p><strong>Tech:</strong> ESP32 ADC, WebSocket / HTTP server, HTML5 Canvas, SPI for SD card, C/C++ firmware.</p>`
+  },
+  p2: {
+    title: "Home Automation Using Clap Detection",
+    detail: `<p><strong>Overview:</strong> Microcontroller interprets clap patterns (single, double, triple) to toggle relays controlling lights and devices. Works in noisy environments with adaptive thresholding and debounce logic.</p>
+    <p><strong>Features:</strong> Clap-pattern recognition, configurable timeouts, relay protection, user feedback LED.</p>
+    <p><strong>Tech:</strong> Arduino/STM32, analog microphone input, envelope detection, FSM-based pattern recognition.</p>`
+  },
+  p3: {
+    title: "Automatic Water Level Controller Using IC555",
+    detail: `<p><strong>Overview:</strong> Simple and reliable water level control circuit using comparators and IC555 timing for pump control and alarm logic. Designed for low-cost deployment in tanks.</p>
+    <p><strong>Features:</strong> Multiple probe levels, automatic start/stop, manual override, indicator LEDs.</p>
+    <p><strong>Tech:</strong> IC555, comparators, relay interface, PCB design.</p>`
+  },
+  p4: {
+    title: "Environmental Monitoring",
+    detail: `<p><strong>Overview:</strong> Sensor network collecting temperature, humidity, and air quality. Data is logged locally and pushed to a cloud dashboard for historical analysis.</p>
+    <p><strong>Features:</strong> MQTT publishing, threshold alerts, data visualization, battery-optimized telemetry.</p>
+    <p><strong>Tech:</strong> ESP32/Arduino, DHT/BME sensors, MQTT, InfluxDB/Grafana (optional).</p>`
+  },
+  p5: {
+    title: "Automatic Handwash Dispenser",
+    detail: `<p><strong>Overview:</strong> Touchless dispenser using IR sensor for hygiene applications. Controls pump motor for precise dosage and prevents waste with timed intervals.</p>
+    <p><strong>Features:</strong> Adjustable dosage, power-saving sleep mode, failsafe on continuous activation.</p>
+    <p><strong>Tech:</strong> IR sensor, small DC pump or solenoid, MCU control.</p>`
+  },
+  p6: {
+    title: "RADAR Using Ultrasonic Sensor & Data Logging",
+    detail: `<p><strong>Overview:</strong> Radar-style scanning using an ultrasonic sensor on a servo, building a real-time map of obstacles and logging detections with timestamps and approximate distances.</p>
+    <p><strong>Features:</strong> 180° sweep, distance plotting on simple web dashboard, object logging (CSV), alert zones, calibration routine.</p>
+    <p><strong>Tech:</strong> HC-SR04/ultrasonic module, servo, ESP8266/ESP32 for logging, simple web UI.</p>`
+  },
+  p7: {
+    title: "Traffic Light Controller",
+    detail: `<p><strong>Overview:</strong> Programmable traffic signal controller capable of timed sequences and pedestrian crossing requests. Used for simulation and small intersections.</p>
+    <p><strong>Features:</strong> Priority override, pedestrian button debouncing, logging of cycles.</p>
+    <p><strong>Tech:</strong> Microcontroller logic, LEDs or lamp drivers, UI for configuring timings.</p>`
+  },
+  p8: {
+    title: "Street Light Controller",
+    detail: `<p><strong>Overview:</strong> Energy-saving controller turning street lights on/off using LDR and an RTC schedule. Includes surge protection and remote override via simple RF or Wi-Fi module.</p>
+    <p><strong>Tech:</strong> LDR, RTC (DS3231), relay driver, optional ESP module for remote control.</p>`
+  },
+  p9: {
+    title: "Step Counter",
+    detail: `<p><strong>Overview:</strong> Low-power step counter using a 3-axis accelerometer, signal processing to detect steps and store daily counts with timestamps.</p>
+    <p><strong>Tech:</strong> MPU6050/ADXL sensor, low-power MCU, filtering and step-detection algorithms.</p>`
+  },
+  p10: {
+    title: "Border Defence Tank System",
+    detail: `<p><strong>Overview:</strong> Prototype tank platform capable of basic autonomous navigation, obstacle avoidance, and remote operation. Includes sensor fusion and simple threat-response behaviors (non-lethal, simulation).</p>
+    <p><strong>Tech:</strong> Motor drivers, ultrasonic/LiDAR sensors, GPS, microcontroller and RC/Wi-Fi link.</p>`
+  },
+  p11: {
+    title: "Blackbox System for Car",
+    detail: `<p><strong>Overview:</strong> Vehicle blackbox capturing sensor telemetry (accelerometer, GPS, speed) into resilient storage. Designed to survive crashes and provide post-incident data for analysis.</p>
+    <p><strong>Tech:</strong> SD card logging, GPS module, IMU, real-time clock, power-fail safe write strategies.</p>`
+  }
+};
 
-.logo {
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-.logo span {
-  color: #00ffe0;
-}
+// Modal logic
+const modal = document.getElementById('proj-modal');
+const modalContent = document.getElementById('modal-content');
+const modalClose = document.getElementById('modal-close');
 
-nav a {
-  margin: 0 15px;
-  text-decoration: none;
-  color: #fff;
-  transition: 0.3s;
+function openProject(id){
+  const info = projectData[id];
+  if(!info) return;
+  modalContent.innerHTML = `<h2>${info.title}</h2>${info.detail}`;
+  modal.setAttribute('aria-hidden','false');
 }
-nav a:hover {
-  color: #00ffe0;
-}
+function closeModal(){ modal.setAttribute('aria-hidden','true'); modalContent.innerHTML = ''; }
 
-/* Hero Section */
-.hero {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background: linear-gradient(180deg, #000 10%, #0b0c10);
-}
-.hero h2 {
-  font-size: 2.5rem;
-}
-.hero h2 span {
-  color: #00ffe0;
-}
-.hero p {
-  margin: 15px 0;
-}
-.hero button {
-  background: #00ffe0;
-  border: none;
-  padding: 10px 25px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.3s;
-}
-.hero button:hover {
-  background: #0099a8;
-}
+document.querySelectorAll('.read-more').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const id = btn.dataset.id;
+    openProject(id);
+  });
+});
+modalClose.addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
 
-/* Sections */
-section {
-  padding: 80px 10%;
-}
-section h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #00ffe0;
-}
+/* ========= Contact form handling (simple) ========= */
+document.getElementById('contactForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  // For GitHub Pages static sites, use mailto or a form service (Formspree, Getform).
+  // We'll open the user's mail client with the message (simple fallback).
+  const name = this.name.value.trim();
+  const email = this.email.value.trim();
+  const message = this.message.value.trim();
+  const subject = encodeURIComponent(`Portfolio Contact from ${name}`);
+  const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+  window.location.href = `mailto:vivekdeshmukh8055@gmail.com?subject=${subject}&body=${body}`;
+});
 
-/* Skills */
-.skills-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-}
-.skill {
-  background: #1a1a1a;
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: 1px solid #00ffe0;
-}
+/* ========= Small accessibility: close modal with Esc ========= */
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ closeModal(); } });
 
-/* Projects */
-.projects-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-.project-card {
-  background: #111;
-  padding: 20px;
-  border-radius: 15px;
-  border: 1px solid #00ffe0;
-  transition: 0.3s;
-}
-.project-card:hover {
-  transform: translateY(-5px);
-  background: #0f2027;
-}
-
-/* Contact */
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-form input, form textarea {
-  width: 100%;
-  max-width: 500px;
-  padding: 10px;
-  border-radius: 5px;
-  border: none;
-  outline: none;
-}
-form button {
-  background: #00ffe0;
-  color: #000;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-}
-
-/* Footer */
-footer {
-  text-align: center;
-  padding: 20px;
-  background: #000;
-  border-top: 1px solid #00ffe0;
-}
+/* ========= Small animation on load ========= */
+window.addEventListener('load', () => {
+  document.body.style.transition = 'background .6s ease';
+});
